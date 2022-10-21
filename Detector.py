@@ -17,7 +17,7 @@ class Detector:
             # Colors list
             self.colorList = np.random.uniform(low=0, high=255, size =(len(self.classesList), 3))
 
-            print(len(self.classesList), len(self.colorList))
+            print(len(self.classesList), len(self.colorList), self.classesList)
 
     def downloadModel(self, modelURL):
         fileName = os.path.basename(modelURL)
@@ -33,12 +33,24 @@ class Detector:
         cache_dir=self.cacheDir, cache_subdir="checkpoints", 
         extract=True)
 
-    def loadModel(self):
-        print("Loading Model " + self.modelName)
-        tf.keras.backend.clear_session()
-        self.model = tf.saved_model.load(os.path.join(self.cacheDir, "checkpoints", self.modelName, "saved_model"))
+    def loadModel(self, modelName = "", cacheDir = ""):
 
-        print("Model " + self.modelName + " loaded successfully...")
+        if modelName == "":# or cacheDir == "":
+            print("Loading Model " + self.modelName)
+            tf.keras.backend.clear_session()
+            self.model = tf.saved_model.load(os.path.join(self.cacheDir, "checkpoints", self.modelName, "saved_model"))
+
+            print("Model " + self.modelName + " loaded successfully...")
+        else:
+            # modelName = "my_ssd_resnet50_v1_fpn_640x640_coco17_tpu-8"
+            # cacheDir = ""
+            self.modelName = modelName
+            self.cacheDir = cacheDir
+            print("Loading Model " + modelName)
+            tf.keras.backend.clear_session()
+            self.model = tf.saved_model.load(os.path.join(cacheDir, "checkpoints", modelName, "saved_model"))
+
+            print("Model " + modelName + " loaded successfully...")
 
     def createBoundingBox(self, image, threshold=0.5):
         inputTensor = cv2.cvtColor(image.copy(), cv2.COLOR_BGR2RGB)
@@ -56,9 +68,10 @@ class Detector:
         boundingBoxIndex = tf.image.non_max_suppression(boundingBoxes, classScores, max_output_size=50,
         iou_threshold=threshold, score_threshold=threshold)
 
-        print(boundingBoxIndex)
+        print("amount of bounding boxes:", len(boundingBoxes))
         
         if len(boundingBoxes) != 0:
+            # print("bbIndex:", boundingBoxIndex)
             for i in boundingBoxIndex:
                 boundingBox = tuple(boundingBoxes[i].tolist())
                 classConfidence = round(100*classScores[i])
@@ -71,7 +84,7 @@ class Detector:
 
                 ymin, xmin, ymax, xmax = boundingBox
 
-                
+                print("BOUNDING BOX:", boundingBox)
                 xmin, xmax, ymin, ymax = (int(xmin * imW), int(xmax * imW), int(ymin * imH), int(ymax * imH))
 
                 cv2.rectangle(image,(xmin, ymin), (xmax, ymax), color=classColor, thickness=1)
@@ -107,6 +120,7 @@ class Detector:
         image = cv2.imread(imagePath,1)
         image = cv2.resize(image, (960, 540)) 
 
+        # boundingBoxImage = self.createBoundingBox(image, threshold)
         boundingBoxImage = self.createBoundingBox(image, threshold)
         # self.createBoundingBox(image)
 
