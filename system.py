@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from siteclass import Site
+from modelclass import Model
 import json
 
 class System:
