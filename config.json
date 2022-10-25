@@ -44,10 +44,14 @@
         "Camera": {
             "Models": [
                 {
+                    "SensorType": "Camera",
                     "Name": "GunDetection",
+                    "Threshold": 0.7,
                     "Data": {
-                        "Path": "Some Directory",
-                        "Threshold": 0.7
+                        "ModelName": "my_mobilenet_v7",
+                        "ModelPath": "C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\pretrained_models",
+                        "LabelPath": "C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\coco_v2.names",
+                        "Feed": "C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\images\\dog-running.mp4"
                     }
                 }
             ]
