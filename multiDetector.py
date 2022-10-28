@@ -73,9 +73,13 @@ class Detector:
 
         if len(boundingBoxes) != 0:
             # print("bbIndex:", boundingBoxIndex)
+            maxConfidence = 0
             for i in boundingBoxIndex:
                 boundingBox = tuple(boundingBoxes[i].tolist())
                 classConfidence = round(100 * classScores[i])
+                if classConfidence > maxConfidence:
+                    maxConfidence = classConfidence # choosing the priority for the gun recognition window
+
                 classIndex = classIndexes[i]
                 # print(self.classesList)
                 classLabelText = self.classesList[classIndex].upper()
@@ -109,8 +113,8 @@ class Detector:
                 # bottom right, bottom and then right
                 cv2.line(image, (xmax, ymax), (xmax - lineWidth, ymax), classColor, thickness=5)
                 cv2.line(image, (xmax, ymax), (xmax, ymax - lineWidth), classColor, thickness=5)
-
-            return image
+            print("MaxConfidence is : ", maxConfidence)
+            return (maxConfidence, image)
 
     def predictImage(self, imagePath, threshold=0.5):
         image = cv2.imread(imagePath, 1)
@@ -126,15 +130,23 @@ class Detector:
         cv2.waitKey(5000)
         cv2.destroyAllWindows()
 
-    def predictVideo(self, videoPath, threshold=0.5):
-        print("made it here")
-        cap = cv2.VideoCapture(videoPath)
+    def predictVideo(self, captureList, threshold=0.5):
 
-        if not cap.isOpened():
-            print("Error opening video...")
-            return
+        captures = []
+        for feed in captureList:
+            captures.append(cv2.VideoCapture(feed))
 
-        success, image = cap.read()
+        # if not cap1.isOpened():
+        #     print("Error opening video...")
+        #     return Refer to this error later 
+
+        success = True
+        images = []
+
+        for capture in captures:
+            captureSuccess, image = capture.read()
+            images.append(image)
+            success = captureSuccess
 
         startTime = 0
 
@@ -144,15 +156,43 @@ class Detector:
             fps = 1 / (currentTime - startTime)
             startTime = currentTime
 
-            boundingBoxImage = self.createBoundingBox(image, threshold)
+            #Create the images with bounding boxes, priorities aren't sorted yet
+            boundingBoxTuples = []
+            for image in images:
+                boundingBoxTuples.append(self.createBoundingBox(image, threshold))
 
-            cv2.putText(boundingBoxImage, "FPS: " + str(int(fps)), (20, 70), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
-            cv2.imshow("Result", boundingBoxImage)
+            boundingBoxTuples.sort(key = lambda x: x[0], reverse=True)
+
+            priorityFeed = None
+            otherFeeds = None
+            priorityAssigned = False
+            otherAssigned = False #to make sure the priorities and other feeds are assinged in the proper order
+            for image in boundingBoxTuples:
+                if not priorityAssigned:
+                    priorityFeed = cv2.resize(image[1], (960, 540))
+                    priorityAssigned = True
+                elif not otherAssigned:
+                    otherFeeds = cv2.resize(image[1], (960, 540))
+                    # print("Otherfeedsshapeasdf: ", str(otherFeeds.shape()))
+                    otherAssigned = True
+
+                else:
+                    otherFeeds = np.concatenate((otherFeeds, cv2.resize(image[1], (960, 540)) ), axis=0 )
+                    # print("Otherfeedsshape1234: ", str(otherFeeds.shape()))
+
+            otherFeeds = cv2.resize(otherFeeds, (480, 540))
+            outputImage = np.concatenate((priorityFeed,otherFeeds),axis=1)
+            cv2.putText(outputImage, "FPS: " + str(int(fps)), (20, 70), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
+            cv2.imshow("Result", outputImage)
 
             key = cv2.waitKey(1) & 0xFF
             if key == ord("q"):
                 break
 
-            success, image = cap.read()
+            images.clear()
+            for capture in captures:
+                captureSuccess, image = capture.read()
+                images.append(image)
+                success = captureSuccess
 
         # cv2.destoryAllWindows()

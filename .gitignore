@@ -1,2 +1,4 @@
 venv/
 *.pyc
+videos
+__pycache__

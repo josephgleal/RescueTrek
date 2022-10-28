@@ -48,10 +48,10 @@
                     "Name": "GunDetection",
                     "Threshold": 0.7,
                     "Data": {
-                        "ModelName": "my_mobilenet_v7",
+                        "ModelName": "C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\pretrained_models\\checkpoints\\my_mobilenet_v7_model",
                         "ModelPath": "C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\pretrained_models",
                         "LabelPath": "C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\coco_v2.names",
-                        "Feed": "C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\images\\dog-running.mp4"
+                        "Feed": "C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\images\\guntable.jpg"
                     }
                 }
             ]

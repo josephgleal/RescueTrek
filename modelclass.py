@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
-from Detector import *
+from multiDetector import *
+import cv2
 
+import inspect
 #for testing purposes for scripting below
 import json
 
@@ -22,7 +24,7 @@ class Model(ABC):
         pass
 
     @abstractmethod
-    def predidct(self):
+    def predict(self):
         pass
 
 
@@ -50,9 +52,9 @@ class imageDetector(Model):
         print(name)
         self.name = name
 
-    def predict(self, feed,image=True):
+    def predict(self, feed,image=True): # feed is nos array
         if image:
-            self.detector.predictImage(feed, self.threshold)
+            self.detector.predictImage(feed, self.threshold) # Adjust this later
         else:
             self.detector.predictVideo(feed, self.threshold)
 
@@ -60,8 +62,8 @@ class imageDetector(Model):
         self.detector.readClasses(labelPath)
 
 
-# f = open('config.json')
-# models = (json.load(f))["SensorData"]["Camera"]["Models"]
+f = open('config.json')
+models = (json.load(f))["SensorData"]["Camera"]["Models"]
 # modelList = []
 # for model in models:
 #     modelList.append(imageDetector(model['Data']['ModelName'], model['Data']['ModelPath'], model['Data']['LabelPath'], model['Data']["Feed"], model['Name']))
@@ -70,14 +72,16 @@ class imageDetector(Model):
 #             r'C:\Users\bceup\PycharmProjects\modelTryingOut\coco_v2.names', "GUNDETECTOR")
 
 # exampleGunModel.startMonitoring(r'C:\Users\bceup\PycharmProjects\modelTryingOut\images\dog-running.mp4')     
-# model = None
-# for a in models:
-#     model = a
+model = None
+for a in models:
+    model = a
     
-# exampleGunModel = imageDetector(model['Data']['ModelName'], model['Data']['ModelPath'], model['Data']['LabelPath'], model['Data']['Threshold'], model['Name'])
+exampleGunModel = imageDetector(model['Data']['ModelName'], model['Data']['ModelPath'], model['Data']['LabelPath'], model['Threshold'], model['Name'])
 
-# for model in modelList:
-#     model.startMonitoring()      
+print(inspect.getfile(cv2))
+# exampleGunModel.predict("C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\images\\guntable.jpg")   
+exampleGunModel.predict(['C:\\CSCE482\\systemDev\\RescueTrek\\videos\\scene1.mp4',
+                'C:\\CSCE482\\systemDev\\RescueTrek\\videos\\scene2.mp4','C:\\CSCE482\\systemDev\\RescueTrek\\videos\\rambo.mp4',0], False )  
 
 
 # before = datetime.datetime.now()
