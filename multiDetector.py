@@ -1,8 +1,24 @@
+from configparser import Interpolation
 from fileinput import filename
-import cv2, time, os, tensorflow as tf
+import cv2, time, os
+# os.add_dll_directory("C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.2/bin")
+# os.add_dll_directory("C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.2/libnvvp")
+# os.add_dll_directory("C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.2/include")
+# os.add_dll_directory("C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.2/extras/CUPTI/lib64")
+# os.add_dll_directory("C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.2/cuda/bin")
+# print("Added directories before te3nsorflow")
+import tensorflow as tf
 import numpy as np
+import sys
+from threading import Thread
 
 from tensorflow.python.keras.utils.data_utils import get_file
+
+# import keras
+# from keras import backend as K
+# print(K.tensorflow_backend._get_available_gpus())
+
+print("Loading in multiDetector Module")
 
 np.random.seed(123)
 
@@ -40,7 +56,8 @@ class Detector:
             print("Loading Model " + self.modelName)
             tf.keras.backend.clear_session()
             self.model = tf.saved_model.load(os.path.join(self.cacheDir, "checkpoints", self.modelName, "saved_model"))
-
+            
+            # self.model.
             print("Model " + self.modelName + " loaded successfully...")
         else:
             # modelName = "my_ssd_resnet50_v1_fpn_640x640_coco17_tpu-8"
@@ -57,8 +74,10 @@ class Detector:
         inputTensor = cv2.cvtColor(image.copy(), cv2.COLOR_BGR2RGB)
         inputTensor = tf.convert_to_tensor(inputTensor, dtype=tf.uint8)
         inputTensor = inputTensor[tf.newaxis, ...]
+        detections = None
 
-        detections = self.model(inputTensor)
+        with tf.device('/GPU:0'):
+            detections = self.model(inputTensor)
 
         boundingBoxes = detections['detection_boxes'][0].numpy()
         classIndexes = detections['detection_classes'][0].numpy().astype(np.int32)
@@ -130,7 +149,7 @@ class Detector:
         cv2.waitKey(5000)
         cv2.destroyAllWindows()
 
-    def predictVideo(self, captureList, threshold=0.5):
+    def predictVideo(self, captureList, threshold=0.5, GPU=True):
 
         captures = []
         for feed in captureList:
@@ -167,28 +186,48 @@ class Detector:
             otherFeeds = None
             priorityAssigned = False
             otherAssigned = False #to make sure the priorities and other feeds are assinged in the proper order
+            gpu_frame = cv2.cuda_GpuMat()
             for image in boundingBoxTuples:
                 if not priorityAssigned:
-                    priorityFeed = cv2.resize(image[1], (960, 540))
+                    gpu_frame.upload(image[1])
+                    priorityFeed = cv2.cuda_GpuMat(1000, 680, gpu_frame.type())
+                    priorityFeed = cv2.cuda.resize(gpu_frame, (1000, 680), priorityFeed, interpolation=cv2.INTER_CUBIC)
+                    priorityFeed = priorityFeed.download()
+                    # print("Size of prirorityFeed is ", priorityFeed.shape)
                     priorityAssigned = True
+                    # cv2.imshow('', priorityFeed)
+                    # cv2.waitKey(5000)
                 elif not otherAssigned:
-                    otherFeeds = cv2.resize(image[1], (960, 540))
-                    # print("Otherfeedsshapeasdf: ", str(otherFeeds.shape()))
+                    gpu_frame.upload(image[1])
+                    otherFeeds = cv2.cuda_GpuMat(1000, 680, gpu_frame.type())
+                    otherFeeds = cv2.cuda.resize(gpu_frame, (1000, 680), otherFeeds, interpolation=cv2.INTER_CUBIC)
+                    otherFeeds = otherFeeds.download()
                     otherAssigned = True
+                    # cv2.imshow('', otherFeeds)
+                    # cv2.waitKey(5000)
 
                 else:
-                    otherFeeds = np.concatenate((otherFeeds, cv2.resize(image[1], (960, 540)) ), axis=0 )
+                    gpu_frame.upload(image[1])
+                    additionalFeed = cv2.cuda_GpuMat(900, 600, gpu_frame.type())
+                    additionalFeed = cv2.cuda.resize(gpu_frame, (1000, 680), additionalFeed, interpolation=cv2.INTER_CUBIC)
+                    additionalFeed = additionalFeed.download()
+                    # cv2.imshow('', additionalFeed)
+                    # cv2.waitKey(5000)
+                    otherFeeds = np.concatenate((otherFeeds, additionalFeed) , axis=0 )
                     # print("Otherfeedsshape1234: ", str(otherFeeds.shape()))
 
-            otherFeeds = cv2.resize(otherFeeds, (480, 540))
-            outputImage = np.concatenate((priorityFeed,otherFeeds),axis=1)
+            gpu_frame.upload(otherFeeds)
+            sideFeed = cv2.cuda_GpuMat(500, 680, gpu_frame.type())
+            sideFeed = cv2.cuda.resize(gpu_frame, (500, 680), sideFeed, interpolation=cv2.INTER_CUBIC)
+            sideFeed = sideFeed.download()
+            outputImage = np.concatenate((priorityFeed, sideFeed),axis=1)
             cv2.putText(outputImage, "FPS: " + str(int(fps)), (20, 70), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
             cv2.imshow("Result", outputImage)
 
-            key = cv2.waitKey(1) & 0xFF
-            if key == ord("q"):
-                break
-
+            # key = cv2.waitKey(1) & 0xFF
+            # if key == ord("q"):
+            #     break
+            cv2.waitKey()
             images.clear()
             for capture in captures:
                 captureSuccess, image = capture.read()

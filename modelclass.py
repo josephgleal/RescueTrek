@@ -1,6 +1,12 @@
 from abc import ABC, abstractmethod
 from multiDetector import *
 import cv2
+from cv2 import cuda
+import sys
+
+
+print("Python interpreter path: ", sys.executable)
+print("cv2 version", cv2.__version__)
 
 import inspect
 #for testing purposes for scripting below
@@ -64,25 +70,21 @@ class imageDetector(Model):
 
 f = open('config.json')
 models = (json.load(f))["SensorData"]["Camera"]["Models"]
-# modelList = []
-# for model in models:
-#     modelList.append(imageDetector(model['Data']['ModelName'], model['Data']['ModelPath'], model['Data']['LabelPath'], model['Data']["Feed"], model['Name']))
-
-# exampleGunModel = imageDetector("10_22_2_model", r"C:\Users\bceup\PycharmProjects\modelTryingOut\pretrained_models",
-#             r'C:\Users\bceup\PycharmProjects\modelTryingOut\coco_v2.names', "GUNDETECTOR")
-
-# exampleGunModel.startMonitoring(r'C:\Users\bceup\PycharmProjects\modelTryingOut\images\dog-running.mp4')     
+   
 model = None
 for a in models:
     model = a
+
+from tensorflow.python.client import device_lib
+print(device_lib.list_local_devices())
     
-exampleGunModel = imageDetector(model['Data']['ModelName'], model['Data']['ModelPath'], model['Data']['LabelPath'], model['Threshold'], model['Name'])
+exampleGunModel = imageDetector("C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\pretrained_models\\checkpoints\\my_mobilenet_v9_model", model['Data']['ModelPath'], model['Data']['LabelPath'], model['Threshold'], model['Name'])
 
-print(inspect.getfile(cv2))
-# exampleGunModel.predict("C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\images\\guntable.jpg")   
-exampleGunModel.predict(['C:\\CSCE482\\systemDev\\RescueTrek\\videos\\scene1.mp4',
-                'C:\\CSCE482\\systemDev\\RescueTrek\\videos\\scene2.mp4','C:\\CSCE482\\systemDev\\RescueTrek\\videos\\rambo.mp4',0], False )  
+exampleGunModel.predict([".\\videos\\gunstore_trim.mp4", ".\\videos\\scene2.mp4",0], False)  
 
+# exampleGunModel.predict(".\\videos\\gunDark.jpg")
+
+# cuda.printCudaDeviceInfo(0)
 
 # before = datetime.datetime.now()
 # model.predict()
