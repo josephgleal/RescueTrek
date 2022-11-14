@@ -12,12 +12,19 @@ import InputFeedClasses.IPCamera
 import queue
 import threading
 import time
+from modelclass import *
 
 pyqtgraph.setConfigOptions(imageAxisOrder = 'row-major')
+
+
+itemDetector = imageDetector("C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\pretrained_models\\checkpoints\\my_mobilenet_v12_model", "C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\pretrained_models", "C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\coco_v2.names", 0.5)
+
+
 
 class GUI():
     def __init__(self,cameras) -> None:
         #start system here
+        # self.itemDetector = imageDetector("C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\pretrained_models\\checkpoints\\my_mobilenet_v12_model", "C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\pretrained_models", "C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\coco_v2.names", 0.5)
         self.app = QApplication([])
         self.window = MainWindow(cameras)
         self.window.show()
@@ -33,7 +40,7 @@ class GUI():
 class MainWindow(QMainWindow):
     def __init__(self,cameras):
         super().__init__()
-        
+        self.confidenceLevels = []
         self.cameras = []
         self.cameraWindows = []
         self.central_widget = QWidget()
@@ -41,7 +48,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Null Threat")
         self.central_widget.setLayout(self.main_layout)
         self.setCentralWidget(self.central_widget)
-        self.showMaximized()
+
+        # Starting off fullscreen
+        # self.showMaximized()
         self.button_start = QPushButton('start', self.central_widget)
         self.main_layout.addWidget(self.button_start,0,1)
         self.button_start.clicked.connect(self.run)
@@ -53,6 +62,8 @@ class MainWindow(QMainWindow):
         self.current = 0
         
         self.timer = QTimer()
+
+        # update priority / time every second
         self.timer.timeout.connect(self.update_priority)
         self.timer.timeout.connect(self.update_time)
         self.timer.start(1000)
@@ -147,9 +158,15 @@ class CameraWindow(QWidget):
     
     def update_image_no_deque(self):
         # self.startCamera()
+        global itemDetector
+
         if self.frame_updated:
             try:
-                frame = self.frame
+                # frame = self.frame
+                # frame = None
+                # Creating BoundingBox here
+                confidenceLevel, frame = itemDetector.detector.createBoundingBox(self.frame)
+                # # Creating boundingBox end
                 fps = 1 / (self.current - self.start)
                 self.start = time.time()
                 print(type(frame))
