@@ -1,4 +1,2 @@
-venv/
-*.pyc
-
-__pycash__
+venv/*.pyc
+__pycash__/*
