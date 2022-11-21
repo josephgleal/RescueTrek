@@ -161,7 +161,7 @@ class MainWindow(QMainWindow):
     def open_threshold_menu(self):
         print("This will open the additional window to update threshold\n\n\n")
         try:
-            self.threshold_window = ThresholdWindow(self)
+            self.threshold_window = ThresholdWindow()
             self.threshold_window.show()
         except Exception as err:
             print(err)
@@ -176,9 +176,8 @@ class ThresholdWindow(QWidget):
     This "window" is a QWidget. If it has no parent, it
     will appear as a free-floating window as we want.
     """
-    def __init__(self, MainWindow):
+    def __init__(self):
         super().__init__()
-        self.reference_to_main_window = MainWindow
         self.password = ""
         self.threshold_value = const.ITEM_DETECTOR_THRESHOLD
         self.status_text = QLabel()
@@ -186,6 +185,7 @@ class ThresholdWindow(QWidget):
 
         password_text_input = QLineEdit()
         password_text_input.textChanged.connect(self.passwordTextChanged)
+        password_text_input.setEchoMode(QLineEdit.EchoMode.Password)
 
         threshold_value_input = QLineEdit()
         threshold_value_input.setValidator(QDoubleValidator(0.99,99.99,2))
@@ -205,7 +205,6 @@ class ThresholdWindow(QWidget):
 
     def passwordTextChanged(self, text):
         self.password = text
-        print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + self.password + "\n\n\n\n")
 
     def thresholdNumberChanged(self, text):
         self.threshold_value = float(text)
