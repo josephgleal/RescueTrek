@@ -89,27 +89,38 @@ class MainWindow(QMainWindow):
         # self.priority_view.setImage(self.cameraWindows[self.priority_num].frame) #= self.cameraWindows[0].return_frame()
 
         # iterating over camera windows to get one with highest priority level
-        confidenceVal = None
-        priorityCameraWindow = None
-        for cameraWindow in self.cameraWindows:
-            if not confidenceVal:
-                confidenceVal = cameraWindow.confidenceLevel
-                priorityCameraWindow = cameraWindow
-                maxConfidence = cameraWindow.confidenceLevel
-            elif confidenceVal < cameraWindow.confidenceLevel:
-                confidenceVal = cameraWindow.confidenceLevel
-                priorityCameraWindow = cameraWindow
-                maxConfidence = cameraWindow.confidenceLevel
-        
-        #This should be a value that's less than the threshold we set, but for now the value can be 0
-        if (maxConfidence == 0):
-            priorityCameraWindow = self.priorityWindow
-        else:
-            self.priorityWindow = priorityCameraWindow
 
-        self.priority_view.setImage(priorityCameraWindow.frame) #= self.cameraWindows[0].return_frame()
+        #We can update the fps here / maybe setting the picture here instead of inside the camera windows
+
+
+
+
+        try:
+            confidenceVal = None
+            priorityCameraWindow = None
+            for cameraWindow in self.cameraWindows:
+                if not confidenceVal:
+                    confidenceVal = cameraWindow.confidenceLevel
+                    priorityCameraWindow = cameraWindow
+                    maxConfidence = cameraWindow.confidenceLevel
+                elif confidenceVal < cameraWindow.confidenceLevel:
+                    confidenceVal = cameraWindow.confidenceLevel
+                    priorityCameraWindow = cameraWindow
+                    maxConfidence = cameraWindow.confidenceLevel
             
-        print("attempted to update priority")
+            #This should be a value that's less than the threshold we set, but for now the value can be 0
+            if (maxConfidence == 0):
+                print("This isn't updatin here")
+                priorityCameraWindow = self.priorityWindow
+            else:
+                self.priorityWindow = priorityCameraWindow
+
+            self.priority_view.setImage(priorityCameraWindow.frame) #= self.cameraWindows[0].return_frame()
+                
+            print("Updated Priorty")
+        except Exception as err:
+            print(err)
+            print("Failed to update the priority")
 
     def update_time(self):
         self.current = time.time()
@@ -152,7 +163,7 @@ class CameraWindow(QWidget):
         # self.video_frame = QtGui.QLabel()
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_image_no_deque)
-        self.timer.timeout.connect(self.update_time)
+        # self.timer.timeout.connect(self.update_time)
         self.timer.start(.05)
 
         #thread to pull in images in a loop
@@ -195,8 +206,12 @@ class CameraWindow(QWidget):
                 # Creating BoundingBox here
                 self.confidenceLevel, frame = itemDetector.detector.createBoundingBox(self.frame)
                 # # Creating boundingBox end
+                self.current = time.time()
                 fps = 1 / (self.current - self.start)
-                self.start = time.time()
+
+                #basing the update for fps on the time taken between consecutive self.start declarations
+                
+                self.start = self.current 
                 print(type(frame))
                 print(str(int(fps)) + " cam " + str(self.camera.ip))
                 cv2.putText(frame, "FPS: " + str(int(fps)) + " cam " + str(self.camera.ip), (20, 70), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
