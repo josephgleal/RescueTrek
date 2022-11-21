@@ -1,7 +1,8 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, \
-    QPushButton, QVBoxLayout, QWidget, QGridLayout,QLayoutItem, QLabel
+    QPushButton, QVBoxLayout, QWidget, QGridLayout,QLayoutItem, QLabel, \
+    QLineEdit, QFormLayout
 from PyQt6.QtCore import QTimer
-# from PyQt6.QtGui import QGridLayout
+from PyQt6.QtGui import QDoubleValidator
 # import pyqt
 import pyqtgraph
 from pyqtgraph import ImageView, RawImageWidget, ImageItem
@@ -15,6 +16,10 @@ import time
 from system import System
 from modelclass import *
 
+#Temporary for testing purposes
+import sys
+
+import constant as const
 pyqtgraph.setConfigOptions(imageAxisOrder = 'row-major')
 
 
@@ -30,6 +35,8 @@ class GUI():
         self.cameras = self.system.GetCameras()
         self.app = QApplication([])
         self.window = MainWindow(self.cameras)
+        self.itemDetectorThreshold = 0.5
+        
         self.window.show()
         self.app.exit(self.app.exec())
 
@@ -46,6 +53,8 @@ class MainWindow(QMainWindow):
         self.confidenceLevels = []
         self.cameras = []
         self.cameraWindows = []
+
+        self.testWindowString = "Here to show that the main window can be accessed"
         
         self.priorityWindow = None 
         #Here to keep feed with most recent gun detected in the priority feed if no further guns are detected in other feeds
@@ -62,6 +71,8 @@ class MainWindow(QMainWindow):
         self.button_start.clicked.connect(self.run)
         self.priority_view = RawImageWidget(scaled=True)
         self.priority_num = 0
+
+
         
         self.main_layout.addWidget(self.priority_view, 0, 0, 3, 1)
         self.start = 0
@@ -140,6 +151,78 @@ class MainWindow(QMainWindow):
             i += 1
         for camera in self.cameraWindows:
             camera.startCamera()
+
+        #Button to update the threshold confidence value for imageDetector Model
+        self.button_update_threshold = QPushButton('Update Threshold')
+        self.button_update_threshold.clicked.connect(self.open_threshold_menu)
+        self.main_layout.addWidget(self.button_update_threshold,i, 1, 1, 1)
+
+
+    def open_threshold_menu(self):
+        print("This will open the additional window to update threshold\n\n\n")
+        try:
+            self.threshold_window = ThresholdWindow(self)
+            self.threshold_window.show()
+        except Exception as err:
+            print(err)
+            print("Unable to initializeWindow")
+            sys.exit(0)
+        
+
+
+
+class ThresholdWindow(QWidget):
+    """
+    This "window" is a QWidget. If it has no parent, it
+    will appear as a free-floating window as we want.
+    """
+    def __init__(self, MainWindow):
+        super().__init__()
+        self.reference_to_main_window = MainWindow
+        self.password = ""
+        self.threshold_value = const.ITEM_DETECTOR_THRESHOLD
+        self.status_text = QLabel()
+        self.status_text.setText("Enter Password and Threshold Values")
+
+        password_text_input = QLineEdit()
+        password_text_input.textChanged.connect(self.passwordTextChanged)
+
+        threshold_value_input = QLineEdit()
+        threshold_value_input.setValidator(QDoubleValidator(0.99,99.99,2))
+        threshold_value_input.textChanged.connect(self.thresholdNumberChanged)
+
+        button_enter = QPushButton('Enter')
+        button_enter.clicked.connect(self.enteredValues)
+
+        layout = QFormLayout()
+        layout.addRow(self.status_text)
+        layout.addRow("Threshold Value", threshold_value_input)
+        layout.addRow("Password", password_text_input)
+        layout.addRow(button_enter)
+
+        self.setLayout(layout)
+        self.setWindowTitle("Change Threshold Value")
+
+    def passwordTextChanged(self, text):
+        self.password = text
+        print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + self.password + "\n\n\n\n")
+
+    def thresholdNumberChanged(self, text):
+        self.threshold_value = float(text)
+
+    
+    def enteredValues(self):
+        if self.password == const.ADMINISTRATOR_PASSWORD:
+            if self.threshold_value >= 1 or self.threshold_value <= 0.2:
+                self.status_text.setText("The value you enter must be between 0.2 and 1.")
+            else:
+                const.list_of_values.change_threshold_value(self.threshold_value)
+                self.status_text.setText("The threshold was changed to " + str(const.list_of_values.return_threshold_value()))
+
+        # print("Testing output")
+        # print(const.list_of_values.return_threshold_value)
+        # sys.exit(0)
+
         
 
 """Individual window for a camera feed"""
@@ -164,7 +247,7 @@ class CameraWindow(QWidget):
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_image_no_deque)
         # self.timer.timeout.connect(self.update_time)
-        self.timer.start(.05)
+        self.timer.start(1)
 
         #thread to pull in images in a loop
         self.get_frame_thread = Thread(target=self.get_frame)
@@ -204,17 +287,19 @@ class CameraWindow(QWidget):
                 # frame = self.frame
                 # frame = None
                 # Creating BoundingBox here
-                self.confidenceLevel, frame = itemDetector.detector.createBoundingBox(self.frame)
+                self.confidenceLevel, frame = itemDetector.detector.createBoundingBox(self.frame, const.list_of_values.return_threshold_value())
                 # # Creating boundingBox end
                 self.current = time.time()
                 fps = 1 / (self.current - self.start)
 
                 #basing the update for fps on the time taken between consecutive self.start declarations
-                
+
                 self.start = self.current 
                 print(type(frame))
                 print(str(int(fps)) + " cam " + str(self.camera.ip))
                 cv2.putText(frame, "FPS: " + str(int(fps)) + " cam " + str(self.camera.ip), (20, 70), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
+
+                # Location where the raw image widget is updated
                 self.image_view.setImage(frame)
                 
                 self.frame_updated = False
