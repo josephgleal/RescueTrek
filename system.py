@@ -4,11 +4,11 @@ import threading
 from InputFeedClasses.IPCamera import IPCamera
 import constant as const
 import sys
+from modelclass import *
 
 class System:
     listOfActiveModels = []
-    listOfModelReferences = []
-    listOfCameras = []
+
     
     def __init__(self, configFile):
         #Read in config file
@@ -17,16 +17,26 @@ class System:
         
         self.listOfActiveModels = []
         self.listOfModelReferences = []
-        
         self.listOfCameras = []
+        self.listOfSensors = [] #For MVP this will be the same as listOfCameras
+        self.imageDetectorObj
+        
         self.SetCameras(data)
         self.GetListOfActiveModels(data)
-        self.InitializeModels()
+        self.InitializeModels(data)
               
-    def InitializeModels(self):
-        #Determine how to load in the models and cache them perhaps
-        #Save them as a key value pair {SensorType: ModelReference}
-        return
+    def InitializeModels(self, configData):
+        for sensorSpecificModel in self.listOfActiveModels:
+            for model in sensorSpecificModel:
+                if model['Name'] == "UnnamedImageDetector":
+                    data = model['Data']
+                    modelPath = data['ModelPath']
+                    modelFolder = data['ModelFolder']
+                    labelPath = data['LabelPath']
+                    threshold = int(data['Threshold'])
+                    self.imageDetectorObj = imageDetector(modelPath, modelFolder, labelPath, threshold)
+                    
+            
     
     def SetCameras(self, configData):
         # siteId = ""
@@ -45,7 +55,11 @@ class System:
             siteId = site['SiteID']
             location = site['BuildingLocation']
             for sensor in site['ListOfSensors']:
-                if(sensor['SensorType'] == const.CAMERA):
+                sensorType = sensor['SensorType']
+                if(sensorType not in self.listOfSensors):
+                    self.listOfSensors.append(sensor['SensorType'])
+                    
+                if(sensorType == const.CAMERA):
                     print(const.CAMERA)
                     ip = sensor['IP']
                     username = sensor['Username']
@@ -60,45 +74,24 @@ class System:
                     # print("Camera " + siteId + " is initialized\n")
                     # self.listOfCameras.append(camera)
         self.listOfCameras = [oneCamera, oneCamera, oneCamera]
-        # print("initialized " + str(len(self.listOfCameras)) + " cameras")
 
-        
-        # i = 1
-        # for camera in self.listOfCameras:
-        #     # print(camera.location)
-        #     if camera == None:
-        #         print(i)
-        #     i += 1
-        # sys.exit(0)
-        # for camera in self.listOfCameras:
-        #     camera.get_data()
-        #     print(i)
-        #     i += 1
-        # sys.exit()
-                    
-                
-        # camera = IPCamera(ip, username, password, location)
-        # print("Camera " + siteId + " is initialized\n")
-        # self.listOfCameras.append(camera)
         
     def GetCameras(self):
         return self.listOfCameras
+    
+    def GetImageDetector(self):
+        return self.imageDetectorObj
                 
                     
     def GetListOfActiveModels(self, configData):
         sensorData = configData['SensorData']
         for site in configData['ListOfSites']:
             siteId = site['SiteID']
-            
-            listOfSensors = []
-            for sensor in site['ListOfSensors']:
-                listOfSensors.append(sensor)
 
             modelInfo = []
             #Grab a list of all the models that will be used
-            for sensor in listOfSensors:
-                sensorType = sensor['SensorType']
-                sensorModels = sensorData[sensorType]['Models']
+            for sensor in self.listOfSensors:
+                sensorModels = sensorData[sensor]
                 modelInfo.append(sensorModels)
             
             #Filter the list of models to unique entires 

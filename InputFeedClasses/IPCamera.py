@@ -3,12 +3,13 @@ import cv2
 from collections import deque
 import constant as const
 class IPCamera(Feed):
-    def __init__(self, ip, username = "", password = "", models = None):
+    def __init__(self, ip, username = "", password = "", location = "", models = None):
         super().__init__(models)
         self.models = models
         self.cap = None
         self.frame = None
         self.ip = ip
+        self.location = location
         # self.deque = deque(maxlen = 20)
         self.priorities = {}
 

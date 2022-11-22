@@ -19,8 +19,8 @@ from modelclass import *
 pyqtgraph.setConfigOptions(imageAxisOrder = 'row-major')
 
 
-itemDetector = imageDetector("/Users/joey/Downloads/modelsCorrectDirectoryLayout/pretrained_models/checkpoints/my_mobilenet_v12_model", "/Users/joey/Downloads/modelsCorrectDirectoryLayout/pretrained_models", "/Users/joey/Downloads/modelsCorrectDirectoryLayout/coco.names", 0.5)
-
+#itemDetector = imageDetector("/Users/joey/Downloads/modelsCorrectDirectoryLayout/pretrained_models/checkpoints/my_mobilenet_v12_model", "/Users/joey/Downloads/modelsCorrectDirectoryLayout/pretrained_models", "/Users/joey/Downloads/modelsCorrectDirectoryLayout/coco.names", 0.5)
+itemDetector = None
 
 
 class GUI():
@@ -29,6 +29,8 @@ class GUI():
         # self.itemDetector = imageDetector("C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\pretrained_models\\checkpoints\\my_mobilenet_v12_model", "C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\pretrained_models", "C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\coco_v2.names", 0.5)
         self.system = System(configFile)
         self.cameras = self.system.GetCameras()
+        global itemDetector
+        itemDetector = self.system.GetImageDetector()
         self.app = QApplication([])
         self.window = MainWindow(self.cameras)
         self.window.show()
@@ -193,7 +195,7 @@ class CameraWindow(QWidget):
                 self.start = time.time()
                 print(type(frame))
                 print(str(int(fps)) + " cam " + str(self.camera.ip))
-                cv2.putText(frame, "FPS: " + str(int(fps)) + " cam " + str(self.camera.ip), (20, 70), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
+                cv2.putText(frame, "FPS: " + str(int(fps)) + " cam " + str(self.camera.ip) + " Location: " + str(self.camera.location), (20, 70), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
                 self.image_view.setImage(frame)
                 self.frame = frame
             except:
@@ -202,7 +204,7 @@ class CameraWindow(QWidget):
             # print("deque empty?")
             pass
     
-    def update_image_no_deque(self):
+    def update_image_no_deque(self):itemDetector
         # self.startCamera()
         global itemDetector
 
@@ -217,7 +219,7 @@ class CameraWindow(QWidget):
                 self.start = time.time()
                 print(type(frame))
                 print(str(int(fps)) + " cam " + str(self.camera.ip))
-                cv2.putText(frame, "FPS: " + str(int(fps)) + " cam " + str(self.camera.ip), (20, 70), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
+                cv2.putText(frame, "FPS: " + str(int(fps)) + " cam " + str(self.camera.ip) + " Location: " + str(self.camera.location), (20, 70), cv2.FONT_HERSHEY_PLAIN, 2, (0, 255, 0), 2)
                 self.image_view.setImage(frame)
                 
                 self.frame_updated = False
