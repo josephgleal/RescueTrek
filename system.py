@@ -19,22 +19,27 @@ class System:
         self.listOfModelReferences = []
         self.listOfCameras = []
         self.listOfSensors = [] #For MVP this will be the same as listOfCameras
-        self.imageDetectorObj
+        self.imageDetectorObj = None
         
         self.SetCameras(data)
         self.GetListOfActiveModels(data)
         self.InitializeModels(data)
               
     def InitializeModels(self, configData):
-        for sensorSpecificModel in self.listOfActiveModels:
-            for model in sensorSpecificModel:
-                if model['Name'] == "UnnamedImageDetector":
-                    data = model['Data']
-                    modelPath = data['ModelPath']
-                    modelFolder = data['ModelFolder']
-                    labelPath = data['LabelPath']
-                    threshold = int(data['Threshold'])
-                    self.imageDetectorObj = imageDetector(modelPath, modelFolder, labelPath, threshold)
+        for sensorSpecificModels in self.listOfActiveModels:
+            print(sensorSpecificModels)
+            for modelType in sensorSpecificModels:
+                print(modelType + " asdf") #Testing what is coming ou8t
+                models = sensorSpecificModels[modelType]
+                for model in models:
+                    print("MODEL: " + str(model))
+                    if model['Name'] == "GunDetector":
+                        data = model['Data']
+                        modelPath = data['ModelPath']
+                        modelFolder = data['ModelFolder']
+                        labelPath = data['LabelPath']
+                        threshold = int(data['Threshold'])
+                        self.imageDetectorObj = imageDetector(modelPath, modelFolder, labelPath, threshold)
                     
             
     
@@ -57,6 +62,7 @@ class System:
             for sensor in site['ListOfSensors']:
                 sensorType = sensor['SensorType']
                 if(sensorType not in self.listOfSensors):
+                    # print("SensorType here " + sensor['SensorType'])
                     self.listOfSensors.append(sensor['SensorType'])
                     
                 if(sensorType == const.CAMERA):
@@ -87,7 +93,7 @@ class System:
         sensorData = configData['SensorData']
         for site in configData['ListOfSites']:
             siteId = site['SiteID']
-
+            print("SITEID HERE " + siteId)
             modelInfo = []
             #Grab a list of all the models that will be used
             for sensor in self.listOfSensors:

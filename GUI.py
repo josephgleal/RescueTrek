@@ -204,7 +204,7 @@ class CameraWindow(QWidget):
             # print("deque empty?")
             pass
     
-    def update_image_no_deque(self):itemDetector
+    def update_image_no_deque(self):
         # self.startCamera()
         global itemDetector
 

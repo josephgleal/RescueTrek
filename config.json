@@ -42,9 +42,9 @@
     ],
     "SensorData": {
         "Camera": {
-            "Models": [
+            "ImageDetectorModels": [
                 {
-                    "Name": "UnnamedImageDetector",
+                    "Name": "GunDetector",
                     "Data": {
                         "ModelPath": "C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\pretrained_models\\checkpoints\\my_mobilenet_v12_model",
                         "ModelFolder": "C:\\Users\\bceup\\PycharmProjects\\modelTryingOut\\pretrained_models",
