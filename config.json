@@ -42,7 +42,7 @@
     ],
     "SensorData": {
         "Camera": {
-            "ImageDetectorModels": [
+            "BoundingBoxModels": [
                 {
                     "Name": "GunDetector",
                     "Data": {
