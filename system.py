@@ -33,6 +33,8 @@ class System:
                 models = sensorSpecificModels[modelType]
                 for model in models:
                     print("MODEL: " + str(model))
+                    #Function here could be placed with argument to have more generalization on the actual
+                    #initialization of the models 
                     if model['Name'] == "GunDetector":
                         data = model['Data']
                         modelPath = data['ModelPath']
