@@ -3,9 +3,9 @@ import cv2
 from collections import deque
 import constant as const
 class IPCamera(Feed):
-    def __init__(self, ip, username = "", password = "", models = None):
-        super().__init__(models)
-        self.models = models
+    def __init__(self, ip, username = "", password = "", locations = None):
+        super().__init__(locations)
+        self.locations = locations
         self.cap = None
         self.frame = None
         self.ip = ip
@@ -28,8 +28,8 @@ class IPCamera(Feed):
                 self.cap = cv2.VideoCapture(int(self.ip)) #cam_string goes here
             else:
                 self.cap = cv2.VideoCapture(cam_string)
-            if self.models != None:
-                self.priorities = {model: {0:0} for model in self.models}
+            # if self.models != None:
+            #     self.priorities = {model: {0:0} for model in self.models}
         except Exception as Argument:
             print("error with camera with ip", self.ip, "\n", "Error:", Argument)
     

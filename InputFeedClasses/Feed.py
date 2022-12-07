@@ -12,7 +12,7 @@ class Feed(ABC):
     #     self.models = models
 
     @abstractmethod
-    def __init__(self, model = None):
+    def __init__(self, locations = None):
         pass
     #Initiliaze feed object. Inlcudes any setup not involved in initial __init__
     @abstractmethod

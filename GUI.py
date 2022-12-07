@@ -24,7 +24,7 @@ pyqtgraph.setConfigOptions(imageAxisOrder = 'row-major')
 
 
 # itemDetector = imageDetector("/Users/joey/Downloads/modelsCorrectDirectoryLayout/pretrained_models/checkpoints/my_mobilenet_v12_model", "/Users/joey/Downloads/modelsCorrectDirectoryLayout/pretrained_models", "/Users/joey/Downloads/modelsCorrectDirectoryLayout/coco.names", 0.5)
-itemDetector = imageDetector("/Users/sgrac/Documents/FALL 2022/CSCE-482/Deep-Learning/scripts/pre-trained_models/checkpoints/mobilenet_v2.09_model", "/Users/sgrac/Documents/FALL 2022/CSCE-482/Deep-Learning/scripts/pre-trained_models", "/Users/sgrac/Documents/FALL 2022/CSCE-482/Deep-Learning/scripts/coco_v2.names", 0.5)
+itemDetector = imageDetector("/Users/joey/Downloads/modelsCorrectDirectoryLayout/pretrained_models/checkpoints/my_mobilenet_v12_model", "/Users/joey/Downloads/modelsCorrectDirectoryLayout/pretrained_models", "/Users/joey/Downloads/modelsCorrectDirectoryLayout/coco_v2.names", 0.5)
 
 
 class GUI():
@@ -125,7 +125,13 @@ class MainWindow(QMainWindow):
         self.current = 0
         self.counter = 0
         
+        self.p = False
+
         self.timer = QTimer()
+        self.ptimer = QTimer()
+
+        self.ptimer.timeout.connect(self.setP)
+        self.ptimer.start(1500)
 
         # update priority / time every second
 
@@ -135,7 +141,7 @@ class MainWindow(QMainWindow):
 
         self.timer.timeout.connect(self.update_priority)
         self.timer.timeout.connect(self.update_time)
-        self.timer.timeout.connect(self.update_counter)
+        # self.timer.timeout.connect(self.update_counter)
         self.timer.start(10)
     
 
@@ -144,21 +150,23 @@ class MainWindow(QMainWindow):
             self.cameras.append(camera)
         
     #modify this to check from list of priorities
+    def setP(self):
+        self.p = True
     def update_priority(self):
         # if self.priority_num < (len(self.cameraWindows) - 1):
         #     self.priority_num = self.priority_num + 1
         # else:
         #     self.priority_num = 0
         # self.priority_view.setImage(self.cameraWindows[self.priority_num].frame) #= self.cameraWindows[0].return_frame()
-        print(self.counter)
-        confidenceVal = self.confidenceVal
-        priorityCameraWindow = self.priorityCameraWindow
+        # print(self.counter)
+        confidenceVal = None
+        priorityCameraWindow = self.priorityWindow
         maxConfidence = self.maxConfidence
         cameraName = "Priority Cam: "
         currPriorityCamera = self.currPriorityCamera
         currOldPriorityCamera = self.currOldPriorityCamera
         index = 0
-        if self.counter % 10 == 0:
+        if self.p == True:
         # iterating over camera windows to get one with highest priority level
             
             for cameraWindow in self.cameraWindows:
@@ -201,6 +209,8 @@ class MainWindow(QMainWindow):
             if (self.priorityWindow == None):
                 self.priorityWindow = priorityCameraWindow
                 self.priorityWindow.update_border(True,False)
+            elif maxConfidence == 0:
+                self.priorityWindow = self.priorityWindow
             elif priorityCameraWindow == self.oldPriorityWindow and priorityCameraWindow != None:
                 self.oldPriorityWindow = self.priorityWindow
                 self.priorityWindow = priorityCameraWindow
@@ -217,8 +227,9 @@ class MainWindow(QMainWindow):
                 self.priorityWindow = priorityCameraWindow
                 self.oldPriorityWindow.update_border(False,True)
                 self.priorityWindow.update_border(True,False)
-            
+        self.p = False
         priorityCameraWindow = self.priorityWindow
+        self.confidenceVal = confidenceVal
         cameraName = "Priority Cam: " + priorityCameraWindow.camera.locations
         # self.priority_view.setImage(priorityCameraWindow.frame) #= self.cameraWindows[0].return_frame()
         frame = priorityCameraWindow.boundingBoxFrame
@@ -243,8 +254,8 @@ class MainWindow(QMainWindow):
     def update_time(self):
         self.current = time.time()
 
-    def update_counter(self):
-        self.counter += 1
+    # def update_counter(self):
+    #     self.counter += 1
 
         
     def startup():
