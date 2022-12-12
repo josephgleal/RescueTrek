@@ -16,6 +16,7 @@ Once the camera connections are successfully established, any camera feed where 
 The camera feed displayed on the left side priority window will be the feed with the current highest probability of there being a weapon detected. When the priority window switches feed sources, the last feed source that was prioritized will have a yellow border. 
 
 UPDATING THRESHOLD
+
 In the bottom right corner of the GUI, there is an update threshold button.
 
 Pressing this button brings up a dialogue that allows the user to set a new threshold without restarting the system.
