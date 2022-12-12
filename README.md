@@ -1,3 +1,23 @@
+# Environment
+The first step to create a virtual environment in your terminal with virtualenv is to run the command:
+>pip3 install virtualenv
+
+Once the package has been installed, we need to create the folder for the virtual environment. We will name it “venv”:
+>virtualenv venv -p python3 
+
+To activate the virtual environment in the “venv” folder, run the following:
+>source venv/bin/activate
+
+You should see your terminal add the (venv) prefix to each line. This means that you are in the virtual environment and any pip installations you run in this terminal will install into it.
+
+To install all of the required packages into your virtual environment, run the following command:
+>pip3 install -r requirements-windows.txt
+OR
+>pip3 install -r requirements-mac.txt
+Depending on your operating system.
+
+There exists a file within the repository called venv.txt that contains the commands you will need if you are unable to refer to the documentation later.
+
 # RescueTrek
 To run the system, ensure the appropriate environment is open and run the command:
 >Python3 main.py
