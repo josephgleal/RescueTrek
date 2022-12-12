@@ -1,0 +1,11 @@
+numpy==1.23.3
+opencv-contrib-python==4.6.0.66
+PyQt6==6.4.0
+PyQt6-Qt6==6.4.0
+PyQt6-sip==13.4.0
+pyqtgraph==0.13.1
+tensorboard==2.10.1
+tensorboard-data-server==0.6.1
+tensorboard-plugin-wit==1.8.1
+tensorflow-estimator==2.10.0
+tensorflow-macos==2.10.0

@@ -9,5 +9,9 @@ virtualenv venv -p python3
 activate virtual environment:
 source venv/bin/activate 
 
+install packages:
+pip3 install -r requirements-windows.txt
+pip3 install -r requirements-mac.txt
+
 This command will list all installed packages into requirments.txt for easy replication:
 pip3 freeze > requirments.txt
