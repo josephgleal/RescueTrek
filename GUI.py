@@ -24,7 +24,7 @@ pyqtgraph.setConfigOptions(imageAxisOrder = 'row-major')
 
 
 # itemDetector = imageDetector("/Users/joey/Downloads/modelsCorrectDirectoryLayout/pretrained_models/checkpoints/my_mobilenet_v12_model", "/Users/joey/Downloads/modelsCorrectDirectoryLayout/pretrained_models", "/Users/joey/Downloads/modelsCorrectDirectoryLayout/coco.names", 0.5)
-itemDetector = imageDetector("/Users/joey/Downloads/modelsCorrectDirectoryLayout/pretrained_models/checkpoints/my_mobilenet_v12_model", "/Users/joey/Downloads/modelsCorrectDirectoryLayout/pretrained_models", "/Users/joey/Downloads/modelsCorrectDirectoryLayout/coco_v2.names", 0.5)
+itemDetector = imageDetector("/Users/joey/Downloads/modelsCorrectDirectoryLayout/pretrained_models/checkpoints/my_mobilenet_v12_model", "/Users/joey/Downloads/modelsCorrectDirectoryLayout/pretrained_models", "/Users/joey/Downloads/modelsCorrectDirectoryLayout/coco_v2.names", 0.6)
 
 
 class GUI():
@@ -36,7 +36,7 @@ class GUI():
         self.app = QApplication([])
         self.window = MainWindow(self.cameras)
 
-        self.itemDetectorThreshold = 0.5
+        self.itemDetectorThreshold = 0.6
 
         self.window.show()
         self.app.exit(self.app.exec())
@@ -64,7 +64,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Null Threat")
         self.central_widget.setLayout(self.main_layout)
         self.setCentralWidget(self.central_widget)
-        self.showMaximized()
+        # self.showMaximized()
         self.button_start = QPushButton('start')
         self.button_start.setStyleSheet(open('css/buttons.css').read())
         self.main_layout.addWidget(self.button_start,1,0,2,1)
@@ -354,6 +354,7 @@ class CameraWindow(QWidget):
         super().__init__()
         self.setStyleSheet(open('css/cameraWindow.css').read())
         self.deque = deque(maxlen=100)
+        self.confidenceLevel = None
 
         self.camera = camera
         # self.layout = QVBoxLayout()

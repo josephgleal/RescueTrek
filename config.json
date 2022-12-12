@@ -8,7 +8,7 @@
                     "SensorType": "Camera",
                     "IP": "192.168.1.183", 
                     "Username": "admin",
-                    "Password": "admin"
+                    "Password": "Camera123"
                 }
 
             ]
@@ -21,7 +21,7 @@
                     "SensorType": "Camera",
                     "IP": "192.168.1.149", 
                     "Username": "admin",
-                    "Password": "admin"
+                    "Password": "Camera123"
                 }
 
             ]
@@ -34,7 +34,7 @@
                     "SensorType": "Camera",
                     "IP": "192.168.1.246", 
                     "Username": "admin",
-                    "Password": "admin"
+                    "Password": "Camera123"
                 }
 
             ]
@@ -49,7 +49,7 @@
                         "ModelPath": "/Users/joey/Downloads/modelsCorrectDirectoryLayout/pretrained_models/checkpoints/my_mobilenet_v12_model",
                         "ModelFolder": "/Users/joey/Downloads/modelsCorrectDirectoryLayout/pretrained_models",
                         "LabelPath": "/Users/joey/Downloads/modelsCorrectDirectoryLayout/coco.names",
-                        "Threshold": 0.5
+                        "Threshold": 0.6
                     }
                 }
             ]

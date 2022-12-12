@@ -4,13 +4,13 @@ CAMERA = "Camera"
 GUN_DETECTION = "Gun Detection"
 
 #This value can be changed at the start of the GUI when threshold value is being read in
-ITEM_DETECTOR_THRESHOLD = 0.5
+ITEM_DETECTOR_THRESHOLD = 0.6
 ADMINISTRATOR_PASSWORD = "Password"
 
 #may be necessary since changing the value of the above constants does not persist in other python files when run
 class adjustable_values():
     def __init__(self):
-        self.item_detector_threshold = 0.5
+        self.item_detector_threshold = 0.6
     
     def change_threshold_value(self, value):
         self.item_detector_threshold = value
