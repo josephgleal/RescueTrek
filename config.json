@@ -7,19 +7,7 @@
             "ListOfSensors": [
                 {
                     "SensorType": "Camera",
-                    "IP": "192.168.1.183", 
-                    "Username": "admin",
-                    "Password": "Camera123"
-                },
-                {
-                    "SensorType": "Camera",
-                    "IP": "1", 
-                    "Username": "admin",
-                    "Password": "admin"
-                },
-                {
-                    "SensorType": "Camera",
-                    "IP": "192.168.1.246", 
+                    "IP": "0", 
                     "Username": "admin",
                     "Password": "Camera123"
                 }

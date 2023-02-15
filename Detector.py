@@ -70,7 +70,7 @@ class Detector:
         
         
         detections = None
-        with tf.device('/GPU:0'):
+        with tf.device('/CPU:0'):
             detections = self.model(inputTensor)
 
         boundingBoxes = detections['detection_boxes'][0].numpy()
